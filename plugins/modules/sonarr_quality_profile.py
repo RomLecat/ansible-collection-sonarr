@@ -205,6 +205,17 @@ def init_module_args():
     )
 
 
+def sorted_formats(profile):
+    # the server returns the format items in an order of its own
+    formats = sorted(profile.format_items, key=lambda item: item.format)
+    return profile.model_copy(update=dict(format_items=formats))
+
+
+def is_changed(state, want):
+    # the quality items keep their order since it ranks the qualities
+    return sorted_formats(state) != sorted_formats(want)
+
+
 def create_quality_profile(want, result):
     set_diff(module, result, want)
     result['changed'] = True
@@ -411,7 +422,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if want != state:
+    if is_changed(state, want):
         update_quality_profile(want, result)
 
     # Exit whith no changes.
