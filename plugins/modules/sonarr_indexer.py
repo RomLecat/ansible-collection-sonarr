@@ -33,6 +33,11 @@ options:
     priority:
         description: Priority.
         type: int
+    season_search_maximum_single_episode_age:
+        description:
+            - Maximum age in days of a single episode for a season search to grab it instead of the season pack (0 means no limit).
+            - If omitted, the value of an existing indexer is left untouched and a new indexer gets the Sonarr default.
+        type: int
     download_client_id:
         description: Download client ID.
         type: int
@@ -115,6 +120,11 @@ priority:
     returned: always
     type: int
     sample: 1
+season_search_maximum_single_episode_age:
+    description: Maximum single episode age for season search.
+    returned: always
+    type: int
+    sample: 0
 download_client_id:
     description: Download client ID.
     returned: always
@@ -164,6 +174,7 @@ def is_changed(status, want):
             want.enable_interactive_search != status.enable_interactive_search or
             want.enable_rss != status.enable_rss or
             want.priority != status.priority or
+            want.season_search_maximum_single_episode_age != status.season_search_maximum_single_episode_age or
             want.download_client_id != status.download_client_id or
             want.config_contract != status.config_contract or
             want.implementation != status.implementation or
@@ -186,6 +197,7 @@ def init_module_args():
         enable_interactive_search=dict(type='bool'),
         enable_rss=dict(type='bool'),
         priority=dict(type='int'),
+        season_search_maximum_single_episode_age=dict(type='int'),
         download_client_id=dict(type='int', default=0),
         config_contract=dict(type='str'),
         implementation=dict(type='str'),
@@ -293,6 +305,7 @@ def run_module():
         enable_interactive_search=module.params['enable_interactive_search'],
         enable_rss=module.params['enable_rss'],
         priority=module.params['priority'],
+        season_search_maximum_single_episode_age=module.params['season_search_maximum_single_episode_age'],
         download_client_id=module.params['download_client_id'],
         config_contract=module.params['config_contract'],
         implementation=module.params['implementation'],
@@ -304,6 +317,10 @@ def run_module():
     # Create a new resource, if needed.
     if result['id'] == 0:
         create_indexer(want, result)
+
+    # Keep the current value of the option when it is not managed.
+    if want.season_search_maximum_single_episode_age is None:
+        want.season_search_maximum_single_episode_age = state.season_search_maximum_single_episode_age
 
     # Update an existing resource.
     want.id = result['id']
