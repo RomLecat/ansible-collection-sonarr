@@ -29,6 +29,12 @@ options:
         description: Enable completed download handling.
         required: true
         type: bool
+    download_client_working_folders:
+        description:
+            - Folders (separated by C(|)) that Sonarr ignores in the download client working folders, such as the unpack folders.
+            - If omitted, the current value is left untouched. Before this option existed the module always wrote C(_UNPACK_|_FAILED_).
+        required: false
+        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -45,6 +51,7 @@ EXAMPLES = r'''
     auto_redownload_failed_from_interactive_search: false
     auto_redownload_failed: false
     enable_completed_download_handling: true
+    download_client_working_folders: '_UNPACK_|_FAILED_'
 '''
 
 RETURN = r'''
@@ -92,6 +99,7 @@ def init_module_args():
         enable_completed_download_handling=dict(type='bool', required=True),
         auto_redownload_failed=dict(type='bool', required=True),
         auto_redownload_failed_from_interactive_search=dict(type='bool', required=True),
+        download_client_working_folders=dict(type='str'),
     )
 
 
@@ -140,11 +148,15 @@ def run_module():
     if state:
         result.update(state.model_dump(by_alias=False))
 
+    working_folders = module.params['download_client_working_folders']
+    if working_folders is None:
+        working_folders = state.download_client_working_folders
+
     want = sonarr.DownloadClientConfigResource(
         enable_completed_download_handling=module.params['enable_completed_download_handling'],
         auto_redownload_failed=module.params['auto_redownload_failed'],
         auto_redownload_failed_from_interactive_search=module.params['auto_redownload_failed_from_interactive_search'],
-        download_client_working_folders='_UNPACK_|_FAILED_',
+        download_client_working_folders=working_folders,
         id=1,
     )
 
