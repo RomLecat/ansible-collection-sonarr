@@ -1,0 +1,40 @@
+---
+# ----------------------------------------------------------------------------
+- name: Edit ui_config
+  devopsarr.sonarr.sonarr_ui_config:
+    first_day_of_week: 1
+    theme: dark
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert ui_config changes
+  ansible.builtin.assert:
+    that:
+      - result.first_day_of_week == 1
+      - result.theme == 'dark'
+# ----------------------------------------------------------------------------
+- name: Test idempotency
+  devopsarr.sonarr.sonarr_ui_config:
+    first_day_of_week: 1
+    theme: dark
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert ui_config idempotency
+  ansible.builtin.assert:
+    that:
+      - result.changed == false
+      - result.theme == 'dark'
+# ----------------------------------------------------------------------------
+- name: Options not passed are left untouched
+  devopsarr.sonarr.sonarr_ui_config:
+    theme: auto
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert untouched options
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.theme == 'auto'
+      - result.first_day_of_week == 1
