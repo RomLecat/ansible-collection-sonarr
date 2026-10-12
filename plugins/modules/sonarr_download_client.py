@@ -237,8 +237,8 @@ def update_download_client(want, result):
             module.fail_json('Error updating download client: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
             module.fail_json('Error updating download client: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     # No need to exit module since it will exit by default either way
-    result.update(response.model_dump(by_alias=False))
 
 
 def delete_download_client(result):

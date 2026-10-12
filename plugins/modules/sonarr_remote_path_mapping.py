@@ -143,8 +143,8 @@ def update_remote_path_mapping(want, result):
             module.fail_json('Error updating remote path mapping: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
             module.fail_json('Error updating remote path mapping: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     # No need to exit module since it will exit by default either way
-    result.update(response.model_dump(by_alias=False))
 
 
 def delete_remote_path_mapping(result):
