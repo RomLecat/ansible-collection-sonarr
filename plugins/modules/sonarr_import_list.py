@@ -33,6 +33,17 @@ options:
     should_monitor:
         description: Should monitor.
         type: str
+    monitor_new_items:
+        description:
+            - Monitor new items (seasons) of the series added by the list.
+            - If omitted, the value of an existing import list is left untouched and a new import list gets the Sonarr default.
+        type: str
+        choices: [all, none]
+    search_for_missing_episodes:
+        description:
+            - Search for missing episodes when a series is added by the list.
+            - If omitted, the value of an existing import list is left untouched and a new import list gets the Sonarr default.
+        type: bool
     root_folder_path:
         description: Root folder path.
         type: str
@@ -116,6 +127,16 @@ should_monitor:
     returned: always
     type: str
     sample: "unknown"
+monitor_new_items:
+    description: Monitor new items.
+    returned: always
+    type: str
+    sample: "all"
+search_for_missing_episodes:
+    description: Search for missing episodes.
+    returned: always
+    type: bool
+    sample: true
 root_folder_path:
     description: Root folder path.
     returned: always
@@ -168,6 +189,8 @@ def is_changed(status, want):
     if (want.name != status.name or
             want.enable_automatic_add != status.enable_automatic_add or
             want.should_monitor != status.should_monitor or
+            want.monitor_new_items != status.monitor_new_items or
+            want.search_for_missing_episodes != status.search_for_missing_episodes or
             want.quality_profile_id != status.quality_profile_id or
             want.season_folder != status.season_folder or
             want.config_contract != status.config_contract or
@@ -193,6 +216,8 @@ def init_module_args():
         config_contract=dict(type='str'),
         implementation=dict(type='str'),
         should_monitor=dict(type='str'),
+        monitor_new_items=dict(type='str', choices=['all', 'none']),
+        search_for_missing_episodes=dict(type='bool'),
         root_folder_path=dict(type='str'),
         series_type=dict(type='str'),
         tags=dict(type='list', elements='int', default=[]),
@@ -296,6 +321,8 @@ def run_module():
         season_folder=module.params['season_folder'],
         quality_profile_id=module.params['quality_profile_id'],
         should_monitor=module.params['should_monitor'],
+        monitor_new_items=module.params['monitor_new_items'],
+        search_for_missing_episodes=module.params['search_for_missing_episodes'],
         root_folder_path=module.params['root_folder_path'],
         config_contract=module.params['config_contract'],
         implementation=module.params['implementation'],
@@ -308,6 +335,12 @@ def run_module():
     # Create a new resource, if needed.
     if result['id'] == 0:
         create_import_list(want, result)
+
+    # Keep the current value of the options that are not managed.
+    if want.monitor_new_items is None:
+        want.monitor_new_items = state.monitor_new_items
+    if want.search_for_missing_episodes is None:
+        want.search_for_missing_episodes = state.search_for_missing_episodes
 
     # Update an existing resource.
     want.id = result['id']
