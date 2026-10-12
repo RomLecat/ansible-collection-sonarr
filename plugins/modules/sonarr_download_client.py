@@ -150,6 +150,7 @@ fields:
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_diff import set_diff
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -198,6 +199,7 @@ def init_module_args():
 
 
 def create_download_client(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:
@@ -228,6 +230,7 @@ def find_download_client(name, result):
 
 
 def update_download_client(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:
@@ -243,6 +246,7 @@ def update_download_client(want, result):
 
 def delete_download_client(result):
     if result['id'] != 0:
+        set_diff(module, result)
         result['changed'] = True
         if not module.check_mode:
             try:

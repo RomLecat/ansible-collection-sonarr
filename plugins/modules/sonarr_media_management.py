@@ -244,6 +244,7 @@ copy_using_hardlinks:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_diff import set_diff
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -289,6 +290,7 @@ def read_media_management(result):
 
 
 def update_media_management(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:

@@ -84,6 +84,7 @@ download_client_working_folders:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_diff import set_diff
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -113,6 +114,7 @@ def read_download_client_config(result):
 
 
 def update_download_client_config(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:

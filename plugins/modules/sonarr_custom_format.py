@@ -109,6 +109,7 @@ specifications:
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_specification_utils import SpecificationHelper
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_diff import set_diff
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -164,6 +165,7 @@ def init_module_args():
 
 
 def create_custom_format(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:
@@ -194,6 +196,7 @@ def find_custom_format(name, result):
 
 
 def update_custom_format(want, result):
+    set_diff(module, result, want)
     result['changed'] = True
     # Only without check mode.
     if not module.check_mode:
@@ -209,6 +212,7 @@ def update_custom_format(want, result):
 
 def delete_custom_format(result):
     if result['id'] != 0:
+        set_diff(module, result)
         result['changed'] = True
         if not module.check_mode:
             try:
