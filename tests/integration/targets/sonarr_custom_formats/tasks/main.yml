@@ -1,0 +1,97 @@
+---
+- name: Create custom formats
+  devopsarr.sonarr.sonarr_custom_formats:
+    custom_formats:
+      - name: Bulk language
+        include_custom_format_when_renaming: false
+        specifications:
+          - name: arabic
+            implementation: LanguageSpecification
+            negate: false
+            required: true
+            fields:
+              - name: value
+                value: 26
+      - name: Bulk title
+        include_custom_format_when_renaming: false
+        specifications:
+          - name: title
+            implementation: ReleaseTitleSpecification
+            negate: false
+            required: true
+            fields:
+              - name: value
+                value: bulk
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert custom formats creation
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.created | length == 2
+      - result.updated | length == 0
+# ----------------------------------------------------------------------------
+- name: Test idempotency
+  devopsarr.sonarr.sonarr_custom_formats:
+    custom_formats:
+      - name: Bulk language
+        include_custom_format_when_renaming: false
+        specifications:
+          - name: arabic
+            implementation: LanguageSpecification
+            negate: false
+            required: true
+            fields:
+              - name: value
+                value: 26
+      - name: Bulk title
+        include_custom_format_when_renaming: false
+        specifications:
+          - name: title
+            implementation: ReleaseTitleSpecification
+            negate: false
+            required: true
+            fields:
+              - name: value
+                value: bulk
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert custom formats idempotency
+  ansible.builtin.assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: Edit a custom format in check mode
+  devopsarr.sonarr.sonarr_custom_formats:
+    custom_formats:
+      - name: Bulk title
+        include_custom_format_when_renaming: false
+        specifications:
+          - name: title
+            implementation: ReleaseTitleSpecification
+            negate: false
+            required: true
+            fields:
+              - name: value
+                value: bulk2
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  check_mode: true
+  register: result
+- name: Assert custom format change detection
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.updated == ['Bulk title']
+# ----------------------------------------------------------------------------
+- name: Delete custom formats
+  devopsarr.sonarr.sonarr_custom_format:
+    name: "{{ item }}"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  loop:
+    - Bulk language
+    - Bulk title

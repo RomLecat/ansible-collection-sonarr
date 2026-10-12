@@ -1,0 +1,33 @@
+---
+- name: Edit qualities
+  devopsarr.sonarr.sonarr_quality_definitions:
+    quality_definitions:
+      - name: HDTV-2160p
+        title: HDTV-2160p
+        max_size: 200.0
+        min_size: 1.0
+        preferred_size: 95.0
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert qualities changes
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.updated == ['HDTV-2160p']
+# ----------------------------------------------------------------------------
+- name: Test idempotency
+  devopsarr.sonarr.sonarr_quality_definitions:
+    quality_definitions:
+      - name: HDTV-2160p
+        title: HDTV-2160p
+        max_size: 200.0
+        min_size: 1.0
+        preferred_size: 95.0
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert qualities idempotency
+  ansible.builtin.assert:
+    that:
+      - result.changed == false

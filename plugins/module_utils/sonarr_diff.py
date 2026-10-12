@@ -74,3 +74,8 @@ def set_diff(module, result, want=None):
     if after and 'protocol' not in after:
         before.pop('protocol', None)
     result['diff'] = dict(before=before, after=after)
+
+
+def build_diff(before, after):
+    """Return dict(before, after) for one resource, cleaned like set_diff does."""
+    return dict(before=_clean(_plain(before)), after=_clean(_plain(after)))
