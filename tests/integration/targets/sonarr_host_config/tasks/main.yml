@@ -1,0 +1,41 @@
+---
+# ----------------------------------------------------------------------------
+- name: Edit host_config
+  devopsarr.sonarr.sonarr_host_config:
+    analytics_enabled: false
+    backup_retention: 29
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert host_config changes
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.backup_retention == 29
+      - result.analytics_enabled == false
+# ----------------------------------------------------------------------------
+- name: Test idempotency
+  devopsarr.sonarr.sonarr_host_config:
+    analytics_enabled: false
+    backup_retention: 29
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert host_config idempotency
+  ansible.builtin.assert:
+    that:
+      - result.changed == false
+      - result.backup_retention == 29
+# ----------------------------------------------------------------------------
+- name: Options not passed are left untouched
+  devopsarr.sonarr.sonarr_host_config:
+    backup_retention: 28
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: Assert untouched options
+  ansible.builtin.assert:
+    that:
+      - result.changed == true
+      - result.backup_retention == 28
+      - result.analytics_enabled == false
